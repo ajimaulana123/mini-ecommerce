@@ -16,8 +16,8 @@ class OrderRepository
     {
         $this->db->insert($this->table, [
             'product_id' => $productId,
-            'product_name' => $productName,  // baru
-            'user_id' => $userId, // baru
+            'product_name' => $productName,
+            'user_id' => $userId,
             'qty' => $qty,
             'total_price' => $totalPrice,
             'status' => 'pending',
@@ -42,7 +42,6 @@ class OrderRepository
         return $this->db->get($this->table, '*', ['id' => $orderId]);
     }
 
-    // Ambil semua order user berdasarkan user_id (asumsikan ada kolom user_id)
     public function getOrdersByUser($userId)
     {
         return $this->db->select($this->table, '*', [
@@ -51,7 +50,6 @@ class OrderRepository
         ]);
     }
 
-    // Hitung total order user
     public function countOrders($userId)
     {
         return $this->db->count($this->table, '*', ['user_id' => $userId]);

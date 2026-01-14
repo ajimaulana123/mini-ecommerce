@@ -14,10 +14,8 @@ class ProductController extends Controller
 
     public function getProducts($request, $response)
     {
-        // Ambil semua produk
         $products = $this->productRepo->all();
 
-        // Kirim data ke view
         return $this->view->render($response, 'product.twig', [
             'products' => $products
         ]);
@@ -25,11 +23,10 @@ class ProductController extends Controller
 
     public function getProductDetail($request, $response, $args)
     {
-        $id = $args['id']; // ambil ID dari URL
+        $id = $args['id'];
         $product = $this->productRepo->where('id', $id);
 
         if (!$product) {
-            // bisa redirect ke halaman 404 atau kembali ke daftar produk
             return $response->withStatus(404)->write('Produk tidak ditemukan');
         }
 

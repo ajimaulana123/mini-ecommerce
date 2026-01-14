@@ -32,7 +32,7 @@ class Auth
         }
 
         if (password_verify($password, $user['password'])) {
-            $_SESSION['user'] = $user['id']; // karena $user itu array, bukan object
+            $_SESSION['user'] = $user['id'];
             return true;
         }
 

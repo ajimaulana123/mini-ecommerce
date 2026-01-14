@@ -1,7 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../vendor/autoload.php';
-// Old CSRF module
+
+// Old module
 require __DIR__.'/../vendor/adbario/slim-secure-session-middleware/src/SecureSessionHandler.php';
 
 use Adbar\SecureSessionHandler;

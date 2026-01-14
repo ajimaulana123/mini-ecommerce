@@ -1,12 +1,10 @@
 <?php
 
-// CartController.php
 namespace App\Controllers;
 
 class CartController extends Controller
 {
     private $productRepo;
-    private $cartRepo;
 
     public function __construct($container)
     {
@@ -16,10 +14,8 @@ class CartController extends Controller
 
     public function getCart($request, $response)
     {
-        // Ambil cart dari session
         $cart = $_SESSION['cart'] ?? [];
 
-        // Render twig cart
         return $this->view->render($response, 'cart.twig', [
             'cart' => $cart
         ]);

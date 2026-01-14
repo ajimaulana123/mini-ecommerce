@@ -12,7 +12,6 @@ class GuestMiddleware extends Middleware
             );
         }
 
-        // Kalau belum login, lanjut ke route
         return $next($request, $response);
     }
 }

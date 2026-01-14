@@ -14,7 +14,7 @@ class DashboardController extends Controller
 
     public function index($request, $response)
     {
-        $userId = $_SESSION['user']; // asumsikan session menyimpan info user
+        $userId = $_SESSION['user'];
 
         $orders = $this->orderRepo->getOrdersByUser($userId);
         $totalOrders = $this->orderRepo->countOrders($userId);

@@ -8,13 +8,12 @@ class AuthMiddleware extends Middleware
         // Kalau BELUM login, redirect ke signin
         if (!$this->container->auth->check()) {
             $this->container->flash->addMessage('error', 'Mohon login terlebih dahulu');
-            
+
             return $response->withRedirect(
                 $this->container->router->pathFor('auth.signin')
             );
         }
 
-        // Kalau sudah login, lanjut ke route
         return $next($request, $response);
     }
 }

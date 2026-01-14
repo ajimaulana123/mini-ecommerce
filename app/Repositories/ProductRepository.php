@@ -24,7 +24,7 @@ class ProductRepository
         ]);
     }
 
-    // --- tambah method untuk order ---
+    //tambah method untuk order ---
     public function reduceStock(string $productId, int $qty)
     {
         // Ambil stok sekarang

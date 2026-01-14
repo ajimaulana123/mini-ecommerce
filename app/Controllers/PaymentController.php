@@ -16,7 +16,6 @@ class PaymentController extends Controller
         $this->productRepo = $container->productRepo;
     }
 
-    // POST /payment/mock/{productId}/pay
     public function mockPayment($request, $response, $args)
     {
         $productId = $args['productId'];

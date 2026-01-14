@@ -1,0 +1,573 @@
+{% extends 'templates/app.twig' %}
+
+{% block content %}
+<div class="product-detail-container">
+    <div class="product-detail-grid">
+        <!-- Gambar Produk -->
+        <div class="product-image-section">
+            <div class="image-container">
+                {% if product.image_url %}
+                    <img src="{{ product.image_url }}" class="product-img" alt="{{ product.name }}">
+                {% else %}
+                    <img src="https://images.unsplash.com/photo-1556656793-08538906a9f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" class="product-img" alt="No Image">
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Detail & Order -->
+        <div class="product-info-section">
+            <div class="product-header">
+                <div class="category-badge">{{ product.category|default('Produk') }}</div>
+                <h1 class="product-title">{{ product.name }}</h1>
+                <div class="product-meta">
+                    <span class="meta-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        {{ product.created_at|date("d M Y H:i") }}
+                    </span>
+                    <span class="meta-item">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        ID: {{ product.id }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="price-section">
+                <div class="price-label">Harga</div>
+                <div class="price-amount" id="price">Rp {{ product.price|number_format(0, ',', '.') }}</div>
+            </div>
+
+            <div class="stock-section">
+                <div class="stock-label">Stok Tersedia</div>
+                <div class="stock-badge {% if product.qty > 10 %}in-stock{% elseif product.qty > 0 %}limited-stock{% else %}out-stock{% endif %}">
+                    {% if product.qty > 10 %}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        {{ product.qty }} unit
+                    {% elseif product.qty > 0 %}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        {{ product.qty }} unit tersisa
+                    {% else %}
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                        Stok Habis
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="description-section">
+                <h3 class="section-title">Deskripsi Produk</h3>
+                <p class="description-text">{{ product.description|default('Deskripsi belum tersedia') }}</p>
+            </div>
+
+            <!-- Pesan Error -->
+            <div id="errorMsg" class="alert-message error d-none"></div>
+
+            <!-- Form Order -->
+            <form action="/order/{{ product.id }}" method="POST" id="orderForm" class="order-form">
+                <div class="form-group">
+                    <label for="quantity" class="form-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        Jumlah Pembelian
+                    </label>
+                    <div class="quantity-control">
+                        <button type="button" class="qty-btn minus" onclick="adjustQuantity(-1)">−</button>
+                        <input type="number" name="quantity" id="quantity" class="quantity-input" value="1" min="1" max="{{ product.qty }}">
+                        <button type="button" class="qty-btn plus" onclick="adjustQuantity(1)">+</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                        </svg>
+                        Total Pembayaran
+                    </label>
+                    <div class="total-price-display" id="totalPrice">
+                        Rp {{ product.price|number_format(0, ',', '.') }}
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="buyBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    Beli Sekarang
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .product-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 30px 20px;
+    }
+
+    .product-detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        background: #fff;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .product-image-section {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    .image-container {
+        width: 100%;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .product-img {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .product-img:hover {
+        transform: scale(1.02);
+    }
+
+    .product-info-section {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .product-header {
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 20px;
+    }
+
+    .category-badge {
+        display: inline-block;
+        background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 6px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 15px;
+    }
+
+    .product-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0 0 15px 0;
+        line-height: 1.2;
+    }
+
+    .product-meta {
+        display: flex;
+        gap: 20px;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .price-section {
+        background: linear-gradient(135deg, #f6f9ff 0%, #f0f4ff 100%);
+        padding: 20px;
+        border-radius: 15px;
+        border-left: 4px solid #4f46e5;
+    }
+
+    .price-label {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .price-amount {
+        font-size: 36px;
+        font-weight: 800;
+        color: #1a1a1a;
+        letter-spacing: -0.5px;
+    }
+
+    .stock-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-radius: 12px;
+    }
+
+    .stock-label {
+        font-size: 14px;
+        color: #555;
+        font-weight: 500;
+    }
+
+    .stock-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .stock-badge.in-stock {
+        background: rgba(34, 197, 94, 0.1);
+        color: #16a34a;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .stock-badge.limited-stock {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .stock-badge.out-stock {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .description-section {
+        background: #fafafa;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #eee;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin: 0 0 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .description-text {
+        font-size: 15px;
+        line-height: 1.7;
+        color: #555;
+        margin: 0;
+    }
+
+    .order-form {
+        background: linear-gradient(135deg, #ffffff 0%, #fdfdfd 100%);
+        padding: 25px;
+        border-radius: 15px;
+        border: 1px solid #eee;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .form-group {
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 12px;
+    }
+
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .qty-btn {
+        width: 45px;
+        height: 45px;
+        border: 2px solid #e5e7eb;
+        background: white;
+        border-radius: 10px;
+        font-size: 20px;
+        font-weight: 600;
+        color: #555;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .qty-btn:hover {
+        border-color: #4f46e5;
+        background: #f5f3ff;
+        color: #4f46e5;
+    }
+
+    .quantity-input {
+        flex: 1;
+        height: 45px;
+        text-align: center;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        background: white;
+    }
+
+    .quantity-input:focus {
+        outline: none;
+        border-color: #4f46e5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .total-price-display {
+        font-size: 28px;
+        font-weight: 800;
+        color: #1a1a1a;
+        padding: 15px;
+        background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+        border-radius: 10px;
+        text-align: center;
+        border: 2px solid #4f46e5;
+    }
+
+    .submit-btn {
+        width: 100%;
+        height: 60px;
+        background: linear-gradient(45deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        background: linear-gradient(45deg, #4338ca 0%, #6d28d9 100%);
+    }
+
+    .submit-btn:disabled {
+        background: linear-gradient(45deg, #9ca3af 0%, #6b7280 100%);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    .alert-message {
+        padding: 15px 20px;
+        border-radius: 10px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .alert-message.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    .d-none {
+        display: none !important;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .product-detail-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+            padding: 25px;
+        }
+
+        .product-img {
+            height: 400px;
+        }
+
+        .product-title {
+            font-size: 28px;
+        }
+
+        .price-amount {
+            font-size: 32px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .product-detail-container {
+            padding: 20px 15px;
+        }
+
+        .product-detail-grid {
+            padding: 20px;
+        }
+
+        .product-img {
+            height: 350px;
+        }
+
+        .product-title {
+            font-size: 24px;
+        }
+
+        .price-amount {
+            font-size: 28px;
+        }
+
+        .total-price-display {
+            font-size: 24px;
+            padding: 12px;
+        }
+
+        .submit-btn {
+            height: 55px;
+            font-size: 16px;
+        }
+
+        .product-meta {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .product-img {
+            height: 300px;
+        }
+
+        .price-section {
+            padding: 15px;
+        }
+
+        .order-form {
+            padding: 20px;
+        }
+
+        .qty-btn,
+        .quantity-input {
+            height: 40px;
+        }
+
+        .qty-btn {
+            width: 40px;
+        }
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    const price = {{ product.price }};
+    const maxQty = {{ product.qty }};
+    const $qtyInput = $('#quantity');
+    const $totalPrice = $('#totalPrice');
+    const $errorMsg = $('#errorMsg');
+    const $buyBtn = $('#buyBtn');
+
+    function updateTotal(qty) {
+        let total = price * qty;
+        $totalPrice.text('Rp ' + total.toLocaleString('id-ID'));
+    }
+
+    function validateQty(qty) {
+        if (qty < 1) {
+            $errorMsg.text('Jumlah minimal 1').removeClass('d-none');
+            $buyBtn.prop('disabled', true);
+            return 1;
+        } else if (qty > maxQty) {
+            $errorMsg.text('Jumlah tidak boleh melebihi stok (' + maxQty + ')').removeClass('d-none');
+            $buyBtn.prop('disabled', true);
+            return maxQty;
+        } else {
+            $errorMsg.text('').addClass('d-none');
+            $buyBtn.prop('disabled', false);
+            return qty;
+        }
+    }
+
+    function adjustQuantity(change) {
+        let qty = parseInt($qtyInput.val()) || 1;
+        qty += change;
+        qty = validateQty(qty);
+        $qtyInput.val(qty);
+        updateTotal(qty);
+    }
+
+    // Event input qty
+    $qtyInput.on('input', function() {
+        let qty = parseInt($(this).val()) || 1;
+        qty = validateQty(qty);
+        $(this).val(qty);
+        updateTotal(qty);
+    });
+
+    // Disable tombol beli jika stok 0
+    if (maxQty === 0) {
+        $qtyInput.prop('disabled', true);
+        $qtyInput.parent().find('.qty-btn').prop('disabled', true);
+        $buyBtn.prop('disabled', true);
+        $errorMsg.text('Stok habis').removeClass('d-none');
+        updateTotal(0);
+    } else {
+        updateTotal(parseInt($qtyInput.val()));
+        $errorMsg.addClass('d-none');
+    }
+
+    // Expose adjustQuantity to global scope for button onclick
+    window.adjustQuantity = adjustQuantity;
+});
+</script>
+{% endblock %}

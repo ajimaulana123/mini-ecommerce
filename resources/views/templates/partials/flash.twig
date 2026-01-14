@@ -1,0 +1,17 @@
+{% if flash.getMessage('info') %}
+	<div class="alert alert-info flash-message">
+		{{ flash.getMessage('info') | first }}
+	</div>
+
+    <style>
+        .alert-info {
+            margin-top: 60px;
+        }
+    </style>
+{% endif %}
+
+{% if flash.getMessage('error') %}
+	<div class="alert alert-danger flash-message py-5">
+		{{ flash.getMessage('error') | first }}
+	</div>
+{% endif %}

@@ -1,0 +1,516 @@
+{% extends 'templates/app.twig' %}
+
+{% block content %}
+<div class="payment-result-container">
+    <div class="payment-result-card">
+        <!-- Header dengan ikon status -->
+        <div class="result-header {% if order.status == 'success' %}success{% else %}failed{% endif %}">
+            <div class="status-icon">
+                {% if order.status == 'success' %}
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                {% else %}
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="15" y1="9" x2="9" y2="15"></line>
+                        <line x1="9" y1="9" x2="15" y2="15"></line>
+                    </svg>
+                {% endif %}
+            </div>
+            <h1 class="result-title">
+                {% if order.status == 'success' %}
+                    Pembayaran Berhasil!
+                {% else %}
+                    Pembayaran Gagal
+                {% endif %}
+            </h1>
+            <p class="result-subtitle">
+                {% if order.status == 'success' %}
+                    Pesanan Anda telah berhasil diproses
+                {% else %}
+                    Terjadi kesalahan dalam proses pembayaran
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Detail Pesanan -->
+        <div class="order-details">
+            <h2 class="details-title">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+                Detail Pesanan
+            </h2>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                        </svg>
+                        Produk
+                    </div>
+                    <div class="detail-value">{{ product.name }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4H6z"></path>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <path d="M16 10a4 4 0 0 1-8 0"></path>
+                        </svg>
+                        Jumlah
+                    </div>
+                    <div class="detail-value">{{ order.qty }} item</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                        Total Harga
+                    </div>
+                    <div class="detail-value price">Rp {{ order.total_price|number_format(0, ',', '.') }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                            <line x1="1" y1="10" x2="23" y2="10"></line>
+                        </svg>
+                        Metode Pembayaran
+                    </div>
+                    <div class="detail-value method">{{ payment.payment_method }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        Waktu Transaksi
+                    </div>
+                    <div class="detail-value">{{ "now"|date("d M Y H:i:s") }}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        Status Pembayaran
+                    </div>
+                    <div class="detail-value">
+                        <span class="status-badge {% if order.status == 'success' %}success{% else %}failed{% endif %}">
+                            {% if order.status == 'success' %}
+                                Berhasil
+                            {% else %}
+                                Gagal
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informasi Tambahan -->
+        <div class="additional-info">
+            {% if order.status == 'success' %}
+                <div class="info-card success">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M8 12l3 3 5-5"></path>
+                    </svg>
+                    <div class="info-content">
+                        <h3>Pesanan Diproses</h3>
+                        <p>Terima kasih atas pembelian Anda. Pesanan sedang diproses dan akan dikirim segera.</p>
+                    </div>
+                </div>
+            {% else %}
+                <div class="info-card failed">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <div class="info-content">
+                        <h3>Pembayaran Gagal</h3>
+                        <p>Silakan coba lagi atau hubungi customer service untuk bantuan lebih lanjut.</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="info-card general">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <div class="info-content">
+                    <h3>Butuh Bantuan?</h3>
+                    <p>Hubungi customer service kami di 1500-123 atau email ke support@example.com</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+            {% if order.status == 'success' %}
+                <a href="/dashboard" class="action-btn primary">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    Lihat Pesanan Saya
+                </a>
+            {% endif %}
+            
+            <a href="/" class="action-btn secondary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11l2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6"></path>
+                </svg>
+                Kembali ke Produk
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-result-container {
+        min-height: 100vh;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .payment-result-card {
+        width: 100%;
+        max-width: 800px;
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    /* Header Section */
+    .result-header {
+        padding: 50px 40px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .result-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        opacity: 0.05;
+    }
+
+    .result-header.success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+    }
+
+    .result-header.success::before {
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+
+    .result-header.failed {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+    }
+
+    .result-header.failed::before {
+        background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.4' fill-rule='evenodd'/%3E%3C/svg%3E");
+    }
+
+    .status-icon {
+        margin-bottom: 20px;
+    }
+
+    .status-icon svg {
+        stroke-width: 1.5;
+    }
+
+    .result-title {
+        font-size: 36px;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+        letter-spacing: -0.5px;
+    }
+
+    .result-subtitle {
+        font-size: 18px;
+        opacity: 0.9;
+        margin: 0;
+        max-width: 500px;
+        margin: 0 auto;
+        line-height: 1.5;
+    }
+
+    /* Order Details */
+    .order-details {
+        padding: 40px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .details-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 24px;
+        font-weight: 600;
+        color: #1e293b;
+        margin: 0 0 30px 0;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .detail-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .detail-value.price {
+        font-size: 20px;
+        font-weight: 700;
+        color: #059669;
+    }
+
+    .detail-value.method {
+        color: #4f46e5;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-badge.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .status-badge.failed {
+        background: rgba(239, 68, 68, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* Additional Info */
+    .additional-info {
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .info-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 25px;
+        border-radius: 16px;
+        border: 1px solid;
+    }
+
+    .info-card.success {
+        background: rgba(16, 185, 129, 0.05);
+        border-color: rgba(16, 185, 129, 0.2);
+        color: #065f46;
+    }
+
+    .info-card.failed {
+        background: rgba(239, 68, 68, 0.05);
+        border-color: rgba(239, 68, 68, 0.2);
+        color: #991b1b;
+    }
+
+    .info-card.general {
+        background: rgba(100, 116, 139, 0.05);
+        border-color: rgba(100, 116, 139, 0.2);
+        color: #475569;
+    }
+
+    .info-content h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+    }
+
+    .info-content p {
+        font-size: 15px;
+        margin: 0;
+        line-height: 1.5;
+        opacity: 0.9;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        padding: 0 40px 40px;
+        display: flex;
+        gap: 15px;
+    }
+
+    .action-btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 18px 24px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+
+    .action-btn.primary {
+        background: linear-gradient(45deg, #4f46e5 0%, #7c3aed 100%);
+        color: white;
+        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+    }
+
+    .action-btn.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.4);
+        background: linear-gradient(45deg, #4338ca 0%, #6d28d9 100%);
+    }
+
+    .action-btn.secondary {
+        background: white;
+        color: #64748b;
+        border-color: #e2e8f0;
+    }
+
+    .action-btn.secondary:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #475569;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .payment-result-container {
+            padding: 20px 15px;
+        }
+
+        .result-header {
+            padding: 40px 25px;
+        }
+
+        .result-title {
+            font-size: 28px;
+        }
+
+        .result-subtitle {
+            font-size: 16px;
+        }
+
+        .order-details,
+        .additional-info {
+            padding: 30px 25px;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .details-title {
+            font-size: 22px;
+            margin-bottom: 25px;
+        }
+
+        .action-buttons {
+            padding: 0 25px 30px;
+            flex-direction: column;
+        }
+
+        .info-card {
+            padding: 20px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .result-header {
+            padding: 30px 20px;
+        }
+
+        .result-title {
+            font-size: 24px;
+        }
+
+        .status-icon {
+            width: 48px;
+            height: 48px;
+        }
+
+        .order-details,
+        .additional-info {
+            padding: 25px 20px;
+        }
+
+        .details-title {
+            font-size: 20px;
+        }
+
+        .detail-value {
+            font-size: 15px;
+        }
+
+        .detail-value.price {
+            font-size: 18px;
+        }
+
+        .action-btn {
+            padding: 16px 20px;
+            font-size: 15px;
+        }
+    }
+</style>
+{% endblock %}

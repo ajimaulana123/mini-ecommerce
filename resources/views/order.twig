@@ -1,0 +1,641 @@
+{% extends 'templates/app.twig' %}
+
+{% block content %}
+<div class="checkout-container">
+    <div class="checkout-grid">
+        <!-- Gambar Produk -->
+        <div class="product-preview-section">
+            <div class="preview-container">
+                {% if product.image_url %}
+                    <img src="{{ product.image_url }}" class="preview-image" alt="{{ product.name }}">
+                {% else %}
+                    <img src="https://images.unsplash.com/photo-1556656793-08538906a9f8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" class="preview-image" alt="No Image">
+                {% endif %}
+                <div class="preview-overlay">
+                    <div class="preview-badge">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                        Order Preview
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ringkasan Order -->
+        <div class="order-summary-section">
+            <div class="summary-card">
+                <div class="summary-header">
+                    <h1 class="summary-title">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                            <path d="M22 5H2"></path>
+                            <path d="M8 10h.01"></path>
+                            <path d="M8 14h.01"></path>
+                            <path d="M12 10h.01"></path>
+                            <path d="M12 14h.01"></path>
+                            <path d="M16 10h.01"></path>
+                            <path d="M16 14h.01"></path>
+                        </svg>
+                        Ringkasan Order
+                    </h1>
+                    <div class="product-info">
+                        <h2 class="product-name">{{ product.name }}</h2>
+                        <div class="product-meta">
+                            <span class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                {{ product.created_at|date("d M Y H:i") }}
+                            </span>
+                            <span class="meta-item">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                                </svg>
+                                ID: {{ product.id }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="price-breakdown">
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Harga Satuan</span>
+                        <span class="breakdown-value">Rp {{ product.price|number_format(0, ',', '.') }}</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span class="breakdown-label">Jumlah</span>
+                        <span class="breakdown-value">{{ quantity }} item</span>
+                    </div>
+                    <div class="breakdown-total">
+                        <span class="total-label">Total Harga</span>
+                        <span class="total-amount">Rp {{ total_price|number_format(0, ',', '.') }}</span>
+                    </div>
+                </div>
+
+                {% if quantity > product.qty %}
+                    <div class="alert-card error">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        <div class="alert-content">
+                            <strong>Stok tidak cukup!</strong>
+                            <p>Maksimal {{ product.qty }} tersedia.</p>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Form Checkout -->
+                <form action="/payment/mock/{{ product.id }}/pay" method="POST" class="checkout-form">
+                    <input type="hidden" name="quantity" value="{{ quantity }}">
+
+                    <!-- Pilih metode pembayaran -->
+                    <div class="form-group">
+                        <label for="paymentMethod" class="form-label">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                <line x1="1" y1="10" x2="23" y2="10"></line>
+                            </svg>
+                            Metode Pembayaran
+                        </label>
+                        <div class="payment-methods">
+                            <div class="method-option">
+                                <input type="radio" id="method-bri" name="payment_method" value="BRI" checked>
+                                <label for="method-bri" class="method-label">
+                                    <div class="method-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
+                                            <path d="M6 10h.01"></path>
+                                            <path d="M10 10h.01"></path>
+                                            <path d="M14 10h.01"></path>
+                                            <path d="M18 10h.01"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="method-details">
+                                        <span class="method-name">BRI Virtual Account</span>
+                                        <span class="method-desc">Transfer via BRI</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="method-option">
+                                <input type="radio" id="method-mandiri" name="payment_method" value="Mandiri">
+                                <label for="method-mandiri" class="method-label">
+                                    <div class="method-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <rect x="2" y="6" width="20" height="12" rx="2" ry="2"></rect>
+                                            <line x1="2" y1="10" x2="22" y2="10"></line>
+                                            <line x1="6" y1="14" x2="18" y2="14"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="method-details">
+                                        <span class="method-name">Mandiri Virtual Account</span>
+                                        <span class="method-desc">Transfer via Mandiri</span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="method-option">
+                                <input type="radio" id="method-cod" name="payment_method" value="COD">
+                                <label for="method-cod" class="method-label">
+                                    <div class="method-icon">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <path d="M12 16v-4"></path>
+                                            <path d="M12 8h.01"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="method-details">
+                                        <span class="method-name">Bayar Langsung / COD</span>
+                                        <span class="method-desc">Bayar saat barang diterima</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="submit" class="checkout-btn {% if quantity > product.qty %}disabled{% endif %}" {% if quantity > product.qty %} disabled {% endif %}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 6H9l-7 7 7 7h11a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2Z"></path>
+                                <line x1="9" y1="10" x2="15" y2="10"></line>
+                            </svg>
+                            Checkout Sekarang
+                        </button>
+                        <a href="/product/{{ product.id }}" class="back-btn">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                            </svg>
+                            Kembali ke Detail
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .checkout-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    }
+
+    .checkout-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: start;
+    }
+
+    .product-preview-section {
+        position: sticky;
+        top: 40px;
+    }
+
+    .preview-container {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        background: white;
+    }
+
+    .preview-image {
+        width: 100%;
+        height: 500px;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+    }
+
+    .preview-container:hover .preview-image {
+        transform: scale(1.03);
+    }
+
+    .preview-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        padding: 30px 25px;
+        color: white;
+    }
+
+    .preview-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .order-summary-section {
+        display: flex;
+        justify-content: center;
+    }
+
+    .summary-card {
+        width: 100%;
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.08);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .summary-header {
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 25px;
+        margin-bottom: 30px;
+    }
+
+    .summary-title {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 32px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0 0 25px 0;
+    }
+
+    .product-info {
+        margin-top: 20px;
+    }
+
+    .product-name {
+        font-size: 24px;
+        font-weight: 600;
+        color: #334155;
+        margin: 0 0 15px 0;
+        line-height: 1.3;
+    }
+
+    .product-meta {
+        display: flex;
+        gap: 20px;
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .price-breakdown {
+        background: #f8fafc;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 30px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .breakdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .breakdown-label {
+        font-size: 15px;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .breakdown-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .breakdown-total {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 0 0 0;
+        margin-top: 15px;
+        border-top: 2px solid #e2e8f0;
+    }
+
+    .total-label {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .total-amount {
+        font-size: 28px;
+        font-weight: 800;
+        color: #1e293b;
+        letter-spacing: -0.5px;
+    }
+
+    .alert-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        font-size: 15px;
+    }
+
+    .alert-card.error {
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        color: #dc2626;
+    }
+
+    .alert-content {
+        flex: 1;
+    }
+
+    .alert-content strong {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 16px;
+    }
+
+    .alert-content p {
+        margin: 0;
+        color: #b91c1c;
+    }
+
+    .checkout-form {
+        margin-top: 30px;
+    }
+
+    .form-group {
+        margin-bottom: 30px;
+    }
+
+    .form-label {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 20px;
+    }
+
+    .payment-methods {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .method-option {
+        position: relative;
+    }
+
+    .method-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .method-label {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 18px 20px;
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .method-label:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+    }
+
+    .method-option input[type="radio"]:checked + .method-label {
+        border-color: #4f46e5;
+        background: linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .method-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 45px;
+        height: 45px;
+        background: #f1f5f9;
+        border-radius: 10px;
+        color: #64748b;
+    }
+
+    .method-option input[type="radio"]:checked + .method-label .method-icon {
+        background: #4f46e5;
+        color: white;
+    }
+
+    .method-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .method-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .method-desc {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 40px;
+    }
+
+    .checkout-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        height: 60px;
+        background: linear-gradient(45deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+    }
+
+    .checkout-btn:hover:not(.disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+        background: linear-gradient(45deg, #059669 0%, #047857 100%);
+    }
+
+    .checkout-btn.disabled {
+        background: linear-gradient(45deg, #9ca3af 0%, #6b7280 100%);
+        cursor: not-allowed;
+        opacity: 0.7;
+        box-shadow: none;
+    }
+
+    .back-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        width: 100%;
+        height: 55px;
+        background: white;
+        color: #64748b;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .back-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #475569;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+        .checkout-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .product-preview-section {
+            position: static;
+        }
+
+        .preview-image {
+            height: 400px;
+        }
+
+        .summary-card {
+            padding: 30px;
+        }
+
+        .summary-title {
+            font-size: 28px;
+        }
+
+        .product-name {
+            font-size: 22px;
+        }
+
+        .total-amount {
+            font-size: 24px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .checkout-container {
+            padding: 25px 15px;
+        }
+
+        .preview-image {
+            height: 350px;
+        }
+
+        .summary-card {
+            padding: 25px;
+        }
+
+        .summary-title {
+            font-size: 24px;
+        }
+
+        .product-name {
+            font-size: 20px;
+        }
+
+        .product-meta {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .price-breakdown {
+            padding: 20px;
+        }
+
+        .checkout-btn,
+        .back-btn {
+            height: 50px;
+            font-size: 16px;
+        }
+
+        .method-label {
+            padding: 15px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .preview-image {
+            height: 300px;
+        }
+
+        .summary-title {
+            font-size: 22px;
+        }
+
+        .product-name {
+            font-size: 18px;
+        }
+
+        .total-amount {
+            font-size: 22px;
+        }
+
+        .breakdown-value {
+            font-size: 14px;
+        }
+
+        .method-label {
+            padding: 12px;
+        }
+
+        .method-icon {
+            width: 40px;
+            height: 40px;
+        }
+    }
+</style>
+{% endblock %}

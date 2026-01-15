@@ -73,6 +73,9 @@ $container['orderRepo'] = function ($container) {
 $container['paymentRepo'] = function ($container) {
     return new \App\Repositories\PaymentRepository($container->db);
 };
+$container['baseRepo'] = function ($container) {
+    return new \App\Repositories\BaseRepository($container->db);
+};
 
 
 $container['validator'] = function ($container) {

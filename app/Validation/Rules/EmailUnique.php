@@ -16,7 +16,6 @@ class EmailUnique extends Rule
         $this->userRepo = $userRepo;
     }
 
-    // WAJIB signature sama
     public function check($value): bool
     {
         $users = $this->userRepo->where('email', $value);
@@ -24,7 +23,6 @@ class EmailUnique extends Rule
         return count($users) === 0;
     }
 
-    //SETTER bawaan Rakit, harus cocok
     public function message(string $message): Rule
     {
         $this->message = $message;

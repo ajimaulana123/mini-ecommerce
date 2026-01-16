@@ -1,0 +1,90 @@
+{# Bootstrap only version #}
+{% extends 'templates/app.twig' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Instruksi Pembayaran</h4>
+        </div>
+        <div class="card-body">
+            <h5>Detail Pesanan</h5>
+            <table class="table table-bordered mb-4">
+                <tr>
+                    <th width="30%">ID Pesanan</th>
+                    <td>#{{ order.id }}</td>
+                </tr>
+                <tr>
+                    <th>Produk</th>
+                    <td>{{ order.product_name }}</td>
+                </tr>
+                <tr>
+                    <th>Jumlah</th>
+                    <td>{{ order.qty }} item</td>
+                </tr>
+                <tr>
+                    <th>Total Pembayaran</th>
+                    <td class="text-primary fw-bold">
+                        Rp {{ order.total_price|number_format(0, ',', '.') }}
+                    </td>
+                </tr>
+            </table>
+            
+            <h5>Pilih Metode Pembayaran</h5>
+            <form method="POST" action="/payment/process/{{ order.id }}">
+                <div class="list-group mb-4">
+                    {% for key, method in payment_methods %}
+                    <label class="list-group-item">
+                        <input class="form-check-input me-2" type="radio" 
+                               name="payment_method" value="{{ key }}"
+                               {{ loop.first ? 'checked' : '' }}>
+                        {{ method }}
+                        {% if key == 'cod' %}
+                            <small class="text-muted d-block mt-1">Bayar saat pesanan tiba (Cash on Delivery)</small>
+                        {% elseif key starts with 'mock_' %}
+                            <small class="text-muted d-block mt-1">Simulasi pembayaran untuk testing</small>
+                        {% endif %}
+                    </label>
+                    {% endfor %}
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        Lanjutkan ke Pembayaran
+                    </button>
+                    <a href="/order/{{ product.id }}" class="btn btn-outline-secondary">
+                        Kembali ke Pesanan
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .list-group-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .list-group-item label {
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 0;
+    }
+    
+    .form-check-input:checked {
+        background-color: #4f46e5;
+        border-color: #4f46e5;
+    }
+    
+    .btn-success {
+        background-color: #10b981;
+        border-color: #10b981;
+    }
+    
+    .btn-success:hover {
+        background-color: #059669;
+        border-color: #059669;
+    }
+</style>
+{% endblock %}

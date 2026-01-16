@@ -14,7 +14,9 @@ class OrderRepository
 
     public function insertOrder($productId, $qty, $totalPrice, $productName, $userId)
     {
-        $this->db->insert($this->table, [
+        ("DEBUG insertOrder: product=$productId, user=$userId, qty=$qty");
+
+        $data = [
             'product_id' => $productId,
             'product_name' => $productName,
             'user_id' => $userId,
@@ -22,8 +24,17 @@ class OrderRepository
             'total_price' => $totalPrice,
             'status' => 'pending',
             'created_at' => date('Y-m-d H:i:s')
-        ]);
-        return $this->db->id();
+        ];
+
+        ("Insert data: " . print_r($data, true));
+
+        $result = $this->db->insert($this->table, $data);
+        $insertId = $this->db->id();
+
+        ("Insert result: " . print_r($result, true));
+        ("Insert ID: " . $insertId);
+
+        return $insertId;
     }
 
     public function updateStatus($orderId, $status, $paymentMethod)

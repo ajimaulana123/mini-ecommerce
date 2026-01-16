@@ -24,10 +24,9 @@ class ProductRepository
         ]);
     }
 
-    //tambah method untuk order ---
     public function reduceStock(string $productId, int $qty)
     {
-        // Ambil stok sekarang
+        // get stock
         $product = $this->where('id', $productId);
         if (!$product) {
             return false;
@@ -35,12 +34,12 @@ class ProductRepository
 
         $currentStock = $product['qty'];
 
-        // Validasi stok cukup
+        // validation stock
         if ($qty > $currentStock) {
-            return false; // stok tidak cukup
+            return false;
         }
 
-        // Kurangi stok di database
+        //  reduce stock on db
         return $this->db->update($this->table, [
             'qty' => $currentStock - $qty
         ], [

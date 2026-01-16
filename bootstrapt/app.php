@@ -82,6 +82,14 @@ $container['validator'] = function ($container) {
     return new \App\Validation\Validator($container->userRepo);
 };
 
+// Tambah settings untuk mock payment
+$container['settings']['mock_payment'] = [
+    'server_key' => 'SB-Mock-server-key-12345',
+    'client_key' => 'SB-Mock-client-key-12345',
+    'merchant_id' => 'MOCK_MERCHANT_001',
+    'environment' => 'sandbox'
+];
+
 // Controllers
 $container['HomeController'] = function ($container) {
     return new \App\Controllers\HomeController($container);
@@ -101,6 +109,10 @@ $container['PaymentController'] = function ($container) {
 $container['DashboardController'] = function ($container) {
     return new \App\Controllers\DashboardController($container);
 };
+$container['MockPaymentController'] = function ($container) {
+    return new \App\Controllers\MockPaymentController($container);
+};
+
 
 // Middleware
 $app->add(new \App\Middleware\ValidationErrorMiddleware($container));

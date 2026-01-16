@@ -703,16 +703,6 @@
                 alert('Fitur "View All" akan menampilkan semua transaksi.');
             });
         }
-
-        // Table row click functionality
-        const tableRows = document.querySelectorAll('.transaction-row');
-        tableRows.forEach(row => {
-            row.addEventListener('click', function() {
-                const orderId = this.querySelector('.id-badge').textContent.replace('#', '');
-                // Navigate to order detail page
-                window.location.href = `/order/${orderId}`;
-            });
-        });
     });
 </script>
 {% endblock %}

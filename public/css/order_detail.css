@@ -1,0 +1,48 @@
+/* CSS untuk gambar proporsional */
+.product-image-container {
+    transition: transform 0.3s ease;
+}
+
+.product-image-container:hover {
+    transform: scale(1.02);
+}
+
+.product-image-container img {
+    transition: transform 0.3s ease;
+}
+
+.product-image-container:hover img {
+    transform: scale(1.05);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-image-container {
+        padding-top: 75%;
+        /* Lebih pendek di mobile */
+        margin-bottom: 1rem;
+    }
+
+    .row>.col-md-6 {
+        margin-bottom: 1.5rem;
+    }
+
+    .d-flex.gap-2 {
+        flex-direction: column;
+        gap: 0.5rem !important;
+    }
+
+    .d-flex.gap-2 .btn {
+        width: 100%;
+    }
+
+    .alert .d-flex {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .alert .d-flex svg {
+        margin-bottom: 0.5rem;
+        margin-right: 0;
+    }
+}

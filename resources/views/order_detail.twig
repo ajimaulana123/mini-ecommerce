@@ -1,206 +1,160 @@
 {% extends 'templates/app.twig' %}
 
+{% block styles %}
+    <link rel="stylesheet" href="{{ base_url() }}/css/order_detail.css">
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="card">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Detail Pesanan #{{ order.id }}</h4>
-            <span class="badge bg-{{ order.status == 'success' ? 'success' : 
-                (order.status == 'pending' ? 'warning' : 'secondary') }}">
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Detail Pesanan #{{ order.id }}</h4>
+                <span class="badge bg-{{ order.status == 'success' ? 'success' : 
+                    (order.status == 'pending' ? 'warning' : 'secondary') }}">
+                    {% if order.status == 'success' %}
+                        Success
+                    {% elseif order.status == 'pending' %}
+                        Pending
+                    {% else %}
+                        {{ order.status|upper }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Informasi Pesanan -->
+                    <div class="col-md-6">
+                        <h5>Informasi Pesanan</h5>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th width="40%">ID Pesanan</th>
+                                <td>#{{ order.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Tanggal Pesanan</th>
+                                <td>{{ order.created_at|date("d M Y H:i") }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    <span class="badge bg-{{ order.status == 'success' ? 'success' : 
+                                        (order.status == 'pending' ? 'warning' : 'secondary') }}">
+                                        {% if order.status == 'success' %}
+                                            Success
+                                        {% elseif order.status == 'pending' %}
+                                            Pending
+                                        {% else %}
+                                            {{ order.status|upper }}
+                                        {% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Metode Pembayaran</th>
+                                <td>
+                                    {% if order.payment_method %}
+                                        {% if order.payment_method == 'cod' %}
+                                            Bayar di Tempat (COD)
+                                        {% elseif order.payment_method starts with 'mock_' %}
+                                            {{ order.payment_method|replace({'mock_': ''})|title }} (Simulasi)
+                                        {% else %}
+                                            {{ order.payment_method|title }}
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">Belum dipilih</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    
+                    <!-- Detail Produk -->
+                    <div class="col-md-6">
+                        <h5>Detail Produk</h5>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th width="40%">Nama Produk</th>
+                                <td>{{ order.product_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Jumlah</th>
+                                <td>{{ order.qty }} item</td>
+                            </tr>
+                            <tr>
+                                <th>Total Harga</th>
+                                <td class="fw-bold text-primary">
+                                    Rp {{ order.total_price|number_format(0, ',', '.') }}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Tombol Aksi -->
+                <div class="mt-4 d-flex gap-2">
+                    <a href="/dashboard" class="btn btn-secondary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-2" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                        </svg>
+                        Kembali ke Dashboard
+                    </a>
+                    
+                    {% if order.status == 'pending' %}
+                    <a href="/payment/instructions/{{ order.id }}" class="btn btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-credit-card me-2" viewBox="0 0 16 16">
+                            <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v1h14V4a1 1 0 0 0-1-1H2zm13 4H1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7z"/>
+                            <path d="M2 10a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/>
+                        </svg>
+                        Lanjutkan Pembayaran
+                    </a>
+                    {% elseif order.status == 'success' %}
+                    <button class="btn btn-success" disabled>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle me-2" viewBox="0 0 16 16">
+                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                            <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                        </svg>
+                        Pembayaran Selesai
+                    </button>
+                    {% endif %}
+                </div>
+                
+                <!-- Informasi Status -->
                 {% if order.status == 'success' %}
-                    Success
-                {% elseif order.status == 'pending' %}
-                    Pending
-                {% else %}
-                    {{ order.status|upper }}
-                {% endif %}
-            </span>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <!-- Informasi Pesanan -->
-                <div class="col-md-6">
-                    <h5>Informasi Pesanan</h5>
-                    <table class="table table-bordered">
-                        <tr>
-                            <th width="40%">ID Pesanan</th>
-                            <td>#{{ order.id }}</td>
-                        </tr>
-                        <tr>
-                            <th>Tanggal Pesanan</th>
-                            <td>{{ order.created_at|date("d M Y H:i") }}</td>
-                        </tr>
-                        <tr>
-                            <th>Status</th>
-                            <td>
-                                <span class="badge bg-{{ order.status == 'success' ? 'success' : 
-                                    (order.status == 'pending' ? 'warning' : 'secondary') }}">
-                                    {% if order.status == 'success' %}
-                                        Success
-                                    {% elseif order.status == 'pending' %}
-                                        Pending
-                                    {% else %}
-                                        {{ order.status|upper }}
-                                    {% endif %}
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Metode Pembayaran</th>
-                            <td>
-                                {% if order.payment_method %}
-                                    {% if order.payment_method == 'cod' %}
-                                        Bayar di Tempat (COD)
-                                    {% elseif order.payment_method starts with 'mock_' %}
-                                        {{ order.payment_method|replace({'mock_': ''})|title }} (Simulasi)
-                                    {% else %}
-                                        {{ order.payment_method|title }}
-                                    {% endif %}
-                                {% else %}
-                                    <span class="text-muted">Belum dipilih</span>
+                <div class="alert alert-success mt-3">
+                    <div class="d-flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-3 flex-shrink-0" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>
+                        <div>
+                            <h6 class="alert-heading mb-1">Pesanan Berhasil Diproses!</h6>
+                            <p class="mb-0">
+                                Pembayaran Anda telah berhasil diverifikasi. Pesanan akan segera diproses untuk pengiriman.
+                                {% if order.payment_method == 'cod' %}
+                                    <br><small class="text-muted">Harap siapkan uang tunai saat kurir mengantar pesanan.</small>
                                 {% endif %}
-                            </td>
-                        </tr>
-                    </table>
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                
-                <!-- Detail Produk -->
-                <div class="col-md-6">
-                    <h5>Detail Produk</h5>
-                    <table class="table table-bordered">
-                        <tr>
-                            <th width="40%">Nama Produk</th>
-                            <td>{{ order.product_name }}</td>
-                        </tr>
-                        <tr>
-                            <th>Jumlah</th>
-                            <td>{{ order.qty }} item</td>
-                        </tr>
-                        <tr>
-                            <th>Total Harga</th>
-                            <td class="fw-bold text-primary">
-                                Rp {{ order.total_price|number_format(0, ',', '.') }}
-                            </td>
-                        </tr>
-                    </table>
+                {% elseif order.status == 'pending' %}
+                <div class="alert alert-warning mt-3">
+                    <div class="d-flex">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clock-history me-3 flex-shrink-0" viewBox="0 0 16 16">
+                            <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z"/>
+                            <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/>
+                            <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/>
+                        </svg>
+                        <div>
+                            <h6 class="alert-heading mb-1">Menunggu Pembayaran</h6>
+                            <p class="mb-0">
+                                Pesanan Anda telah dibuat dan menunggu pembayaran. Klik tombol "Lanjutkan Pembayaran" untuk menyelesaikan transaksi.
+                                <br><small class="text-muted">Pesanan akan diproses setelah pembayaran berhasil.</small>
+                            </p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Tombol Aksi -->
-            <div class="mt-4 d-flex gap-2">
-                <a href="/dashboard" class="btn btn-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-2" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
-                    </svg>
-                    Kembali ke Dashboard
-                </a>
-                
-                {% if order.status == 'pending' %}
-                <a href="/payment/instructions/{{ order.id }}" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-credit-card me-2" viewBox="0 0 16 16">
-                        <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v1h14V4a1 1 0 0 0-1-1H2zm13 4H1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V7z"/>
-                        <path d="M2 10a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1v-1z"/>
-                    </svg>
-                    Lanjutkan Pembayaran
-                </a>
-                {% elseif order.status == 'success' %}
-                <button class="btn btn-success" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-circle me-2" viewBox="0 0 16 16">
-                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                        <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
-                    </svg>
-                    Pembayaran Selesai
-                </button>
                 {% endif %}
             </div>
-            
-            <!-- Informasi Status -->
-            {% if order.status == 'success' %}
-            <div class="alert alert-success mt-3">
-                <div class="d-flex">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-check-circle-fill me-3 flex-shrink-0" viewBox="0 0 16 16">
-                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                    </svg>
-                    <div>
-                        <h6 class="alert-heading mb-1">Pesanan Berhasil Diproses!</h6>
-                        <p class="mb-0">
-                            Pembayaran Anda telah berhasil diverifikasi. Pesanan akan segera diproses untuk pengiriman.
-                            {% if order.payment_method == 'cod' %}
-                                <br><small class="text-muted">Harap siapkan uang tunai saat kurir mengantar pesanan.</small>
-                            {% endif %}
-                        </p>
-                    </div>
-                </div>
-            </div>
-            {% elseif order.status == 'pending' %}
-            <div class="alert alert-warning mt-3">
-                <div class="d-flex">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clock-history me-3 flex-shrink-0" viewBox="0 0 16 16">
-                        <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022l-.074.997zm2.004.45a7.003 7.003 0 0 0-.985-.299l.219-.976c.383.086.76.2 1.126.342l-.36.933zm1.37.71a7.01 7.01 0 0 0-.439-.27l.493-.87a8.025 8.025 0 0 1 .979.654l-.615.789a6.996 6.996 0 0 0-.418-.302zm1.834 1.79a6.99 6.99 0 0 0-.653-.796l.724-.69c.27.285.52.59.747.91l-.818.576zm.744 1.352a7.08 7.08 0 0 0-.214-.468l.893-.45a7.976 7.976 0 0 1 .45 1.088l-.95.313a7.023 7.023 0 0 0-.179-.483zm.53 2.507a6.991 6.991 0 0 0-.1-1.025l.985-.17c.067.386.106.778.116 1.17l-1 .025zm-.131 1.538c.033-.17.06-.339.081-.51l.993.123a7.957 7.957 0 0 1-.23 1.155l-.964-.267c.046-.165.086-.332.12-.501zm-.952 2.379c.184-.29.346-.594.486-.908l.914.405c-.16.36-.345.706-.555 1.038l-.845-.535zm-.964 1.205c.122-.122.239-.248.35-.378l.758.653a8.073 8.073 0 0 1-.401.432l-.707-.707z"/>
-                        <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0v1z"/>
-                        <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5z"/>
-                    </svg>
-                    <div>
-                        <h6 class="alert-heading mb-1">Menunggu Pembayaran</h6>
-                        <p class="mb-0">
-                            Pesanan Anda telah dibuat dan menunggu pembayaran. Klik tombol "Lanjutkan Pembayaran" untuk menyelesaikan transaksi.
-                            <br><small class="text-muted">Pesanan akan diproses setelah pembayaran berhasil.</small>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
         </div>
     </div>
-</div>
-
-<style>
-    /* CSS untuk gambar proporsional */
-    .product-image-container {
-        transition: transform 0.3s ease;
-    }
-    
-    .product-image-container:hover {
-        transform: scale(1.02);
-    }
-    
-    .product-image-container img {
-        transition: transform 0.3s ease;
-    }
-    
-    .product-image-container:hover img {
-        transform: scale(1.05);
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .product-image-container {
-            padding-top: 75%; /* Lebih pendek di mobile */
-            margin-bottom: 1rem;
-        }
-        
-        .row > .col-md-6 {
-            margin-bottom: 1.5rem;
-        }
-        
-        .d-flex.gap-2 {
-            flex-direction: column;
-            gap: 0.5rem !important;
-        }
-        
-        .d-flex.gap-2 .btn {
-            width: 100%;
-        }
-        
-        .alert .d-flex {
-            flex-direction: column;
-            text-align: center;
-        }
-        
-        .alert .d-flex svg {
-            margin-bottom: 0.5rem;
-            margin-right: 0;
-        }
-    }
-</style>
 {% endblock %}

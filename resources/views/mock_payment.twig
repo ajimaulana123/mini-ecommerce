@@ -14,51 +14,49 @@
 </form>
 
 <script>
-document.getElementById('paymentForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        e.preventDefault();
 
-    const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
-    const orderId = '{{ order_id }}';
-    const productId = '{{ product.id }}';
-    const quantity = {{ quantity }};
+        const paymentMethod = document.querySelector('input[name="payment_method"]:checked').value;
+        const orderId = '{{ order_id }}';
+        const productId = '{{ product.id }}';
+        const quantity = {{ quantity }};
 
-    // Payment dulu
-    fetch(`/api/mock-payment/complete/${orderId}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ payment_method: paymentMethod })
-    })
-    .then(res => {
-        if (!res.ok) throw new Error('Payment error: ' + res.status);
-        return res.json();
-    })
-    .then(data => {
-        alert('Status Payment: ' + data.status);
+        // Payment dulu
+        fetch(`/api/mock-payment/complete/${orderId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payment_method: paymentMethod })
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Payment error: ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            alert('Status Payment: ' + data.status);
 
-        if (data.status === 'success') {
-            // 2️⃣ Reduce stok
-            return fetch(`/api/product/reduce/${data.productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ quantity: quantity })
-            });
-        } else {
-            throw new Error('Payment gagal, stok tidak dikurangi');
-        }
-    })
-    .then(res => {
-        if (!res.ok) throw new Error('Reduce product failed: ' + res.status);
-        return res.json();
-    })
-    .then(data => {
-        console.log('Produk berhasil dikurangi:', data);
-        // redirect ke halaman result
-        window.location.href = `/payment/result/${orderId}`;
-    })
-    .catch(err => {
-        alert(err.message);
+            if (data.status === 'success') {
+                // 2️⃣ Reduce stok
+                return fetch(`/api/product/reduce/${data.productId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ quantity: quantity })
+                });
+            } else {
+                throw new Error('Payment gagal, stok tidak dikurangi');
+            }
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Reduce product failed: ' + res.status);
+            return res.json();
+        })
+        .then(data => {
+            console.log('Produk berhasil dikurangi:', data);
+            // redirect ke halaman result
+            window.location.href = `/payment/result/${orderId}`;
+        })
+        .catch(err => {
+            alert(err.message);
+        });
     });
-});
-
-
 </script>

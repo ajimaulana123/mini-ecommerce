@@ -1,224 +1,224 @@
 {% extends 'templates/app.twig' %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Simulasi Pembayaran</h4>
-                </div>
-                <div class="card-body">
-                    <h5>Detail Pesanan</h5>
-                    <table class="table table-bordered">
-                        <tr>
-                            <th>ID Pesanan</th>
-                            <td>#{{ order.id }}</td>
-                        </tr>
-                        <tr>
-                            <th>ID Transaksi</th>
-                            <td>
-                                <code>{{ payment.external_id }}</code>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>Produk</th>
-                            <td>{{ order.product_name }}</td>
-                        </tr>
-                        <tr>
-                            <th>Jumlah</th>
-                            <td>{{ order.qty }} item</td>
-                        </tr>
-                        <tr>
-                            <th>Total Pembayaran</th>
-                            <td class="fw-bold text-primary">
-                                Rp {{ payment.amount|number_format(0, ',', '.') }}
-                            </td>
-                        </tr>
-                    </table>
-
-                    <hr>
-
-                    <h5>Detail Pembayaran</h5>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong>Metode Pembayaran:</strong><br>
-                                    <span class="badge bg-primary fs-6">
-                                        {% if payment.payment_method == 'bank_transfer' %}
-                                        💳 Transfer Bank
-                                        {% elseif payment.payment_method == 'credit_card' %}
-                                        💳 Kartu Kredit
-                                        {% elseif payment.payment_method == 'gopay' %}
-                                        📱 GoPay
-                                        {% elseif payment.payment_method == 'cod' %}
-                                        💰 Bayar di Tempat (COD)
-                                        {% else %}
-                                        {{ payment.payment_method|title }}
-                                        {% endif %}
-                                    </span>
-                                </div>
-                                <div class="col-md-6">
-                                    <strong>Status Saat Ini:</strong><br>
-                                    <span class="badge bg-{{ payment.status == 'pending' ? 'warning' :
-                                                    (payment.status == 'success' ? 'success' : 'danger') }} fs-6">
-                                        {% if payment.status == 'success' %}
-                                            Success
-                                        {% elseif payment.status == 'pending' %}
-                                            Pending
-                                        {% elseif payment.status == 'failed' %}
-                                            Failed
-                                        {% else %}
-                                            {{ payment.status|upper }}
-                                        {% endif %}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Simulasi Pembayaran</h4>
                     </div>
+                    <div class="card-body">
+                        <h5>Detail Pesanan</h5>
+                        <table class="table table-bordered">
+                            <tr>
+                                <th>ID Pesanan</th>
+                                <td>#{{ order.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>ID Transaksi</th>
+                                <td>
+                                    <code>{{ payment.external_id }}</code>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Produk</th>
+                                <td>{{ order.product_name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Jumlah</th>
+                                <td>{{ order.qty }} item</td>
+                            </tr>
+                            <tr>
+                                <th>Total Pembayaran</th>
+                                <td class="fw-bold text-primary">
+                                    Rp {{ payment.amount|number_format(0, ',', '.') }}
+                                </td>
+                            </tr>
+                        </table>
 
-                    <h5>Simulasi Hasil Pembayaran</h5>
-                    <form id="paymentForm">
-                        <input type="hidden" name="payment_method" value="{{ payment.payment_method }}">
+                        <hr>
 
-                        <div class="mb-3">
-                            <label class="form-label">Ubah Status Pembayaran Menjadi:</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="status" value="success" checked>
-                                <label class="form-check-label text-success">
-                                    <strong>Berhasil</strong>
-                                    - Pembayaran sukses
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="status" value="failed">
-                                <label class="form-check-label text-danger">
-                                    <strong>Gagal</strong>
-                                    - Pembayaran gagal
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="status" value="pending">
-                                <label class="form-check-label text-warning">
-                                    <strong>Tertunda</strong>
-                                    - Pembayaran tertunda
-                                </label>
+                        <h5>Detail Pembayaran</h5>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Metode Pembayaran:</strong><br>
+                                        <span class="badge bg-primary fs-6">
+                                            {% if payment.payment_method == 'bank_transfer' %}
+                                            💳 Transfer Bank
+                                            {% elseif payment.payment_method == 'credit_card' %}
+                                            💳 Kartu Kredit
+                                            {% elseif payment.payment_method == 'gopay' %}
+                                            📱 GoPay
+                                            {% elseif payment.payment_method == 'cod' %}
+                                            💰 Bayar di Tempat (COD)
+                                            {% else %}
+                                            {{ payment.payment_method|title }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Status Saat Ini:</strong><br>
+                                        <span class="badge bg-{{ payment.status == 'pending' ? 'warning' :
+                                                        (payment.status == 'success' ? 'success' : 'danger') }} fs-6">
+                                            {% if payment.status == 'success' %}
+                                                Success
+                                            {% elseif payment.status == 'pending' %}
+                                                Pending
+                                            {% elseif payment.status == 'failed' %}
+                                                Failed
+                                            {% else %}
+                                                {{ payment.status|upper }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-success w-100">
-                            Simulasikan Pembayaran
-                            {{ payment.payment_method|replace({'_': ' '})|title }}
-                        </button>
-                    </form>
+                        <h5>Simulasi Hasil Pembayaran</h5>
+                        <form id="paymentForm">
+                            <input type="hidden" name="payment_method" value="{{ payment.payment_method }}">
 
-                    <div id="result" class="mt-3"></div>
+                            <div class="mb-3">
+                                <label class="form-label">Ubah Status Pembayaran Menjadi:</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="status" value="success" checked>
+                                    <label class="form-check-label text-success">
+                                        <strong>Berhasil</strong>
+                                        - Pembayaran sukses
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="status" value="failed">
+                                    <label class="form-check-label text-danger">
+                                        <strong>Gagal</strong>
+                                        - Pembayaran gagal
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="status" value="pending">
+                                    <label class="form-check-label text-warning">
+                                        <strong>Tertunda</strong>
+                                        - Pembayaran tertunda
+                                    </label>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100">
+                                Simulasikan Pembayaran
+                                {{ payment.payment_method|replace({'_': ' '})|title }}
+                            </button>
+                        </form>
+
+                        <div id="result" class="mt-3"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    document.getElementById('paymentForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
+    <script>
+        document.getElementById('paymentForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData.entries());
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
 
-        const btn = this.querySelector('button[type="submit"]');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...';
-        btn.disabled = true;
+            const btn = this.querySelector('button[type="submit"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...';
+            btn.disabled = true;
 
-        try {
-            const response = await fetch('/payment/mock-process/{{ payment.external_id }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+            try {
+                const response = await fetch('/payment/mock-process/{{ payment.external_id }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
 
-            const result = await response.json();
+                const result = await response.json();
 
-            const resultDiv = document.getElementById('result');
-            if (result.status_code === '200') {
-                // Terjemahkan status
-               	let statusText = data.status;
-				let alertClass = 'alert-secondary'; // default
+                const resultDiv = document.getElementById('result');
+                if (result.status_code === '200') {
+                    // Terjemahkan status
+                    let statusText = data.status;
+                    let alertClass = 'alert-secondary'; // default
 
-				if (data.status === 'success') {
-					statusText = 'Berhasil';
-					alertClass = 'alert-success';
-				} else if (data.status === 'failed') {
-					statusText = 'Gagal';
-					alertClass = 'alert-danger';
-				} else if (data.status === 'pending') {
-					statusText = 'Tertunda';
-					alertClass = 'alert-warning';
-				}
+                    if (data.status === 'success') {
+                        statusText = 'Berhasil';
+                        alertClass = 'alert-success';
+                    } else if (data.status === 'failed') {
+                        statusText = 'Gagal';
+                        alertClass = 'alert-danger';
+                    } else if (data.status === 'pending') {
+                        statusText = 'Tertunda';
+                        alertClass = 'alert-warning';
+                    }
 
-				resultDiv.innerHTML = `
-					<div class="alert ${alertClass}">
-						<h5>Pembayaran Diproses!</h5>
-						<p>Status: <strong>${statusText.toUpperCase()}</strong></p>
-						<p>${result.status_message || 'Simulasi pembayaran berhasil.'}</p>
-						<p>Mengalihkan...</p>
-					</div>
-				`;
-                // Redirect setelah 3 detik
-                setTimeout(() => {
-                    window.location.href = result.redirect_url || '/orders/' + {{ order.id }};
-                }, 3000);
-            } else {
-                resultDiv.innerHTML = `
+                    resultDiv.innerHTML = `
+                        <div class="alert ${alertClass}">
+                            <h5>Pembayaran Diproses!</h5>
+                            <p>Status: <strong>${statusText.toUpperCase()}</strong></p>
+                            <p>${result.status_message || 'Simulasi pembayaran berhasil.'}</p>
+                            <p>Mengalihkan...</p>
+                        </div>
+                    `;
+                    // Redirect setelah 3 detik
+                    setTimeout(() => {
+                        window.location.href = result.redirect_url || '/orders/' + {{ order.id }};
+                    }, 3000);
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h5>Terjadi Kesalahan</h5>
+                            <p>${result.status_message || 'Gagal memproses pembayaran.'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = `
                     <div class="alert alert-danger">
-                        <h5>Terjadi Kesalahan</h5>
-                        <p>${result.status_message || 'Gagal memproses pembayaran.'}</p>
+                        <h5>Kesalahan Jaringan</h5>
+                        <p>Tidak dapat terhubung ke server. ${error.message}</p>
                     </div>
                 `;
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
-        } catch (error) {
-            document.getElementById('result').innerHTML = `
-                <div class="alert alert-danger">
-                    <h5>Kesalahan Jaringan</h5>
-                    <p>Tidak dapat terhubung ke server. ${error.message}</p>
-                </div>
-            `;
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-        }
-    });
-</script>
+        });
+    </script>
 
-<style>
-    .badge.bg-primary {
-        background-color: #4f46e5 !important;
-    }
-    
-    .badge.bg-success {
-        background-color: #10b981 !important;
-    }
-    
-    .badge.bg-warning {
-        background-color: #f59e0b !important;
-    }
-    
-    .badge.bg-danger {
-        background-color: #ef4444 !important;
-    }
-    
-    .btn-success {
-        background-color: #10b981;
-        border-color: #10b981;
-    }
-    
-    .btn-success:hover {
-        background-color: #059669;
-        border-color: #059669;
-    }
-</style>
+    <style>
+        .badge.bg-primary {
+            background-color: #4f46e5 !important;
+        }
+        
+        .badge.bg-success {
+            background-color: #10b981 !important;
+        }
+        
+        .badge.bg-warning {
+            background-color: #f59e0b !important;
+        }
+        
+        .badge.bg-danger {
+            background-color: #ef4444 !important;
+        }
+        
+        .btn-success {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
+        
+        .btn-success:hover {
+            background-color: #059669;
+            border-color: #059669;
+        }
+    </style>
 {% endblock %}

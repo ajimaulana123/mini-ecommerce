@@ -6,12 +6,15 @@ require_once __DIR__ . '/../vendor/autoload.php';
 require __DIR__.'/../vendor/adbario/slim-secure-session-middleware/src/SecureSessionHandler.php';
 
 use Adbar\SecureSessionHandler;
+use Medoo\Medoo;
 
 $handler = new SecureSessionHandler('my_super_secret_key_123');
 session_set_save_handler($handler, true);
 session_start();
 
-use Medoo\Medoo;
+// Load Env
+$dotenv = Dotenv\Dotenv::create(__DIR__ . '/../');
+$dotenv->load();
 
 $app = new \Slim\App([
     'settings' => [
@@ -23,12 +26,12 @@ $container = $app->getContainer();
 
 $container['db'] = function () {
     return new \Medoo\Medoo([
-        'database_type' => 'mysql',
-        'database_name' => 'ecommerce',
-        'server' => '127.0.0.1',
-        'username' => 'root',
-        'password' => '',
-        'charset' => 'utf8mb4'
+        'database_type' => getenv('DB_TYPE'),
+        'database_name' => getenv('DB_NAME'),
+        'server' => getenv('DB_HOST'),
+        'username' => getenv('DB_USER'),
+        'password' => getenv('DB_PASS'),
+        'charset' => getenv('DB_CHARSET')
     ]);
 };
 
@@ -90,12 +93,24 @@ $container['settings']['mock_payment'] = [
     'environment' => 'sandbox'
 ];
 
+// Logger
+$container['logger'] = function ($container) {
+    $logDir = __DIR__ . '/../logs/';
+    
+    return new \App\Services\MonologLoggerService($logDir);
+};
+
+// Serive
+$container['orderService'] = function ($container) {
+    return new \App\Services\OrderService($container->orderRepo, $container->productRepo, $container->paymentRepo, $container->baseRepo, $container->logger);
+};
+
 // Controllers
 $container['HomeController'] = function ($container) {
     return new \App\Controllers\HomeController($container);
 };
 $container['AuthController'] = function ($container) {
-    return new \App\Controllers\Auth\AuthController($container);
+    return new \App\Controllers\AuthController($container);
 };
 $container['ProductController'] = function ($container) {
     return new \App\Controllers\ProductController($container);
@@ -112,7 +127,6 @@ $container['DashboardController'] = function ($container) {
 $container['MockPaymentController'] = function ($container) {
     return new \App\Controllers\MockPaymentController($container);
 };
-
 
 // Middleware
 $app->add(new \App\Middleware\ValidationErrorMiddleware($container));

@@ -13,7 +13,17 @@ class Auth
 
     public function user() 
     {
-        $userId = $_SESSION['user'] ?? '';
+         // Cek apakah ada user di session DAN tidak empty
+        if (!$this->check()) {
+            return null;
+        }
+        
+        $userId = $_SESSION['user'];
+        
+        // Validasi userId harus numeric dan tidak empty
+        if (empty($userId) || !is_numeric($userId)) {
+            return null;
+        }
 
         return $this->userRepo->where('id', $userId);
     }

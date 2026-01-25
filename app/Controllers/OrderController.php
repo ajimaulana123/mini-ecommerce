@@ -1,148 +1,109 @@
 <?php
-
 namespace App\Controllers;
 
 class OrderController extends Controller
 {
-    private $productRepo;
-    private $orderRepo;
-    private $baseRepo;
-
+    private $orderService;
+    
     public function __construct($container)
     {
         parent::__construct($container);
-        $this->productRepo = $container->productRepo;
-        $this->orderRepo = $container->orderRepo;
-        $this->baseRepo = $container->baseRepo;
+        $this->orderService = new \App\Services\OrderService(
+            $container->orderRepo,
+            $container->productRepo,
+            $container->baseRepo,
+            $container->logger
+        );
     }
-
-    // 1. TAMPILKAN ORDER SUMMARY (GET request)
-    // OrderController.php
+    
     public function showOrderSummary($request, $response, $args)
     {
-        $productId = $args['productId'];
-        $product = $this->productRepo->where('id', $productId);
-
-        if (!$product) {
-            $this->flash->addMessage('error', 'Produk tidak ditemukan');
+        try {
+            $productId = $args['productId'];
+            $quantity = (int) $request->getQueryParam('quantity', 1);
+            
+            // BUSINESS LOGIC DI SERVICE!
+            $summary = $this->orderService->calculateOrderSummary($productId, $quantity);
+            
+            if ($summary['is_stock_limited']) {
+                $this->flash->addMessage('warning', 'Stok terbatas, quantity disesuaikan');
+            }
+            
+            return $this->view->render($response, 'order.twig', [
+                'product' => $summary['product'],
+                'quantity' => $summary['quantity'],
+                'total_price' => $summary['total_price'],
+                'create_order_url' => $this->router->pathFor('order.create', [
+                    'productId' => $productId
+                ])
+            ]);
+            
+        } catch (\Exception $e) {
+            $this->flash->addMessage('error', $e->getMessage());
             return $response->withRedirect('/');
         }
-
-        // AMBIL DARI QUERY PARAM (GET) BUKAN POST BODY
-        $quantity = $request->getQueryParam('quantity', 1);
-
-        // Validasi stok
-        if ($quantity > $product['qty']) {
-            $quantity = $product['qty'];
-            $this->flash->addMessage('warning', 'Stok terbatas, quantity disesuaikan');
-        }
-
-        $totalPrice = $product['price'] * $quantity;
-
-        return $this->view->render($response, 'order.twig', [
-            'product' => $product,
-            'quantity' => $quantity,
-            'total_price' => $totalPrice,
-            'create_order_url' => $this->router->pathFor('order.create', ['productId' => $productId])
-        ]);
     }
-
+    
     public function createOrder($request, $response, $args)
     {
-        $productId = $args['productId'];
-
         try {
-            $postData = $request->getParsedBody();
-
-            $quantity = isset($postData['quantity']) ? (int)$postData['quantity'] : 1;
-            $product = $this->productRepo->where('id', $productId);
-
-            if (!$product) {
-                $this->flash->addMessage('error', 'Product not found');
-                return $response->withRedirect('/');
-            }
-
-            if ($quantity > $product['qty']) {
-                $quantity = $product['qty'];
-            }
-
-            $totalPrice = $product['price'] * $quantity;
-            ("Creating order: product={$product['name']}, qty={$quantity}, price={$totalPrice}");
-
-            // Buat order dulu
-            $this->baseRepo->beginTransaction();
-            ("Transaction started");
-
-            // 1. Insert order dengan status 'pending'
-            $orderId = $this->orderRepo->insertOrder(
-                $productId,
-                $quantity,
-                $totalPrice,
-                $product['name'],
-                $_SESSION['user']
-            );
-
-            ("Order created with ID: " . $orderId);
-
-            $this->baseRepo->commit();
-            ("Transaction committed");
-
-            // 2. Redirect ke payment instructions page
-            $redirectUrl = '/payment/instructions/' . $orderId;
-            ("Redirecting to: " . $redirectUrl);
-
-            return $response->withRedirect($redirectUrl);
+            $productId = $args['productId'];
+            $userId = (int) $_SESSION['user'];
+            $quantity = (int) ($request->getParsedBody()['quantity'] ?? 1);
+            
+            // SEMUA BUSINESS LOGIC DI SERVICE!
+            $orderId = $this->orderService->createOrder($productId, $quantity, $userId);
+            
+            $this->flash->addMessage('success', 'Order berhasil dibuat');
+            return $response->withRedirect('/payment/instructions/' . $orderId);
+            
         } catch (\Exception $e) {
-            ("EXCEPTION: " . $e->getMessage());
-            ("TRACE: " . $e->getTraceAsString());
-
-            if ($this->baseRepo->db->inTransaction()) {
-                $this->baseRepo->rollBack();
-                ("Transaction rolled back");
-            }
-
-            $this->flash->addMessage('error', 'Failed to create order: ' . $e->getMessage());
-            ("Redirecting to /orders due to error");
-            return $response->withRedirect('/orders');
-        } finally {
-            ("=== DEBUG createOrder END ===");
+            $this->flash->addMessage('error', 'Gagal membuat order: ' . $e->getMessage());
+            return $response->withRedirect(
+                $this->router->pathFor('order.summary', ['productId' => $productId])
+            );
         }
     }
-
-    // 3. TAMPILKAN ORDER DETAILS (existing)
+    
     public function showOrderDetails($request, $response, $args)
     {
-        $orderId = $args['id'];
-        $userId = $_SESSION['user'];
-
-        $order = $this->orderRepo->getOrderById($orderId);
-
-        // Security check
-        if (!$order || $order['user_id'] != $userId) {
-            $this->flash->addMessage('error', 'Order tidak ditemukan');
+        try {
+            $orderId = (int) $args['id'];
+            $userId = (int) $_SESSION['user'];
+            
+            // BUSINESS LOGIC DI SERVICE!
+            $data = $this->orderService->getOrderForUser($orderId, $userId);
+            
+            // Payment tetap pakai repo langsung (tidak perlu service)
+            $payment = $this->container->paymentRepo->getPaymentByOrderId($orderId);
+            
+            return $this->view->render($response, 'order_detail.twig', [
+                'order' => $data['order'],
+                'product' => $data['product'],
+                'payment' => $payment
+            ]);
+            
+        } catch (\Exception $e) {
+            $this->flash->addMessage('error', $e->getMessage());
             return $response->withRedirect('/orders');
         }
-
-        $product = $this->productRepo->where('id', $order['product_id']);
-
-        // Get payment info jika ada
-        $payment = $this->container->paymentRepo->getPaymentByOrderId($orderId);
-
-        return $this->view->render($response, 'order_detail.twig', [
-            'order' => $order,
-            'product' => $product,
-            'payment' => $payment
-        ]);
     }
-
-    // 4. LIST ORDERS (existing)
+    
     public function index($request, $response, $args)
     {
-        $userId = $_SESSION['user'];
-        $orders = $this->orderRepo->getOrdersByUser($userId);
-
-        return $this->view->render($response, 'order.twig', [
-            'orders' => $orders
-        ]);
+        try {
+            $userId = (int) $_SESSION['user'];
+            
+            // BUSINESS LOGIC DI SERVICE!
+            $orders = $this->orderService->getUserOrders($userId);
+            
+            return $this->view->render($response, 'order.twig', [
+                'orders' => $orders
+            ]);
+            
+        } catch (\Exception $e) {
+            $this->flash->addMessage('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return $response->withRedirect('/');
+        }
     }
 }
